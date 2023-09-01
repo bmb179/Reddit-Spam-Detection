@@ -112,9 +112,33 @@ user_key %>% ggplot(aes(fill = incidence_bins, x = n, y = reorder(author_masked,
 inner_join(
     mutate(reddit, subreddit = gsub(symbol, '[The official subreddit for this stock]', reddit$subreddit, ignore.case = TRUE)), 
     user_key) %>% 
-  filter(incidence_bins != 'Incidence is Less Than 10%') %>% count(subreddit) %>% 
+  filter(incidence > .5) %>% count(subreddit) %>% 
   ggplot(aes(x = n, y = reorder(subreddit,n))) + 
   geom_col(fill = 'White') + blog_theme +
   labs(x = 'Number of Posts About the Search Topic', y = 'Subreddit',
        title = 'Subreddits With the Most Posts About the Search Topic',
        subtitle = 'One Month Interval')
+
+#Measuring-Links####
+
+#Script to detect incidence of off-site linking in posts
+high.incidence.link.rate <- (inner_join(reddit, user_key) %>% filter(incidence > .5 & 
+                                          (grepl('http', text, ignore.case = TRUE) == TRUE |
+                                           grepl('amp', text, ignore.case = TRUE) == TRUE |
+                                           grepl('www', text, ignore.case = TRUE) == TRUE
+                                          )
+                                        ) %>% count() / 
+                              inner_join(reddit, user_key) %>% filter(incidence > .5) %>% count())[[1]]
+
+#Comparison
+low.incidence.link.rate <- (inner_join(reddit, user_key) %>% filter(incidence <= .5 & 
+                                          (grepl('http', text, ignore.case = TRUE) == TRUE |
+                                           grepl('amp', text, ignore.case = TRUE) == TRUE |
+                                           grepl('www', text, ignore.case = TRUE) == TRUE
+                                          )
+                                        ) %>% count() / 
+                              inner_join(reddit, user_key) %>% filter(incidence <= .5) %>% count())[[1]]
+
+data.frame(Category = c('Posts From High Incidence Users', 'Posts From Low Incidence Users'),
+           Posts.Linking.Off.site = c(high.incidence.link.rate, low.incidence.link.rate))
+
