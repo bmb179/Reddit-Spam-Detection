@@ -6,7 +6,7 @@ library(tidyverse)
 #Reddit-Scrape####
 
 #Search topic is a stock ticker symbol
-symbol <- 'WIMI'
+symbol <- '' #Search topic is redacted for public view
 
 #Retrieves threads from the past month containing the search topic & formats dates
 reddit <- find_thread_urls(keywords = symbol, sort_by = 'new', period = 'month')
